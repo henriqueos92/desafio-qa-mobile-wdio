@@ -185,8 +185,8 @@ mobile-automation/
 ## Instalação
 
 ```bash
-git clone <repositorio>
-cd mobile-automation
+git clone git@github.com:henriqueos92/desafio-qa-mobile-wdio.git
+cd desafio-qa-mobile-wdio
 npm install
 cp .env.example .env
 ```
