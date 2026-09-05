@@ -10,7 +10,8 @@
   "scripts": {
     "test": "echo \"Use: npm run test:android | npm run test:ios | npm run test:browserstack\" && exit 1",
     "app:download": "node scripts/download-app.mjs",
-    "validate:selectors": "node scripts/validate-pageobjects.mjs"
+    "validate:selectors": "node scripts/validate-pageobjects.mjs",
+    "validate:specs": "mocha --dry-run --reporter spec --require ./scripts/mocha-globals-stub.js \"test/specs/**/*.spec.js\""
   },
   "keywords": [
     "webdriverio",
