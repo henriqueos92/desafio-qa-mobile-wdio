@@ -12,7 +12,9 @@
     "app:download": "node scripts/download-app.mjs",
     "validate:selectors": "node scripts/validate-pageobjects.mjs",
     "validate:specs": "mocha --dry-run --reporter spec --require ./scripts/mocha-globals-stub.js \"test/specs/**/*.spec.js\"",
-    "test:android": "wdio run config/wdio.android.conf.js"
+    "test:android": "wdio run config/wdio.android.conf.js",
+    "test:ios": "wdio run config/wdio.ios.conf.js",
+    "validate:configs": "node scripts/validate-configs.mjs"
   },
   "keywords": [
     "webdriverio",
