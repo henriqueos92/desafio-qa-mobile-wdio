@@ -1,0 +1,161 @@
+# ---------------------------------------------------------------------------
+# Pipeline de automação mobile — native-demo-app
+#
+# Executar um emulador Android dentro de um runner compartilhado do GitLab
+# exige KVM/virtualização, que normalmente não está disponível. Por isso os
+# testes mobile do pipeline rodam em dispositivos reais do BrowserStack.
+#
+# Nenhum segredo fica neste arquivo: cadastre em
+# Settings > CI/CD > Variables (marcadas como "Masked" e "Protected"):
+#   BROWSERSTACK_USERNAME
+#   BROWSERSTACK_ACCESS_KEY
+#   BROWSERSTACK_APP_ID   (opcional — se ausente, o pipeline envia o app)
+# ---------------------------------------------------------------------------
+
+stages:
+  - install
+  - validate
+  - test
+  - report
+
+default:
+  image: node:22-bookworm
+  interruptible: true
+  retry:
+    max: 1
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+
+variables:
+  NODE_ENV: test
+  TEST_ENV: BrowserStack
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
+
+# Roda em merge requests e em pushes de branch, sem duplicar o pipeline
+# quando a branch já possui um MR aberto.
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+
+.node_cache: &node_cache
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - .npm/
+  policy: pull
+
+# ---------------------------------------------------------------------------
+# 1. Instalação de dependências
+# ---------------------------------------------------------------------------
+install:dependencies:
+  stage: install
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm/
+    policy: pull-push
+  script:
+    - node --version && npm --version
+    - npm ci --no-audit --no-fund
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - node_modules/
+
+# ---------------------------------------------------------------------------
+# 2. Validações estáticas (não dependem de device nem de credenciais)
+# ---------------------------------------------------------------------------
+validate:project:
+  stage: validate
+  needs: ["install:dependencies"]
+  cache: *node_cache
+  script:
+    - npm run validate:selectors
+    - npm run validate:selectors -- --platform=ios
+    - npm run validate:configs
+    - npm run validate:specs
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - logs/
+
+# ---------------------------------------------------------------------------
+# 3. Testes em dispositivos reais (BrowserStack)
+# ---------------------------------------------------------------------------
+test:browserstack:
+  stage: test
+  needs: ["install:dependencies"]
+  cache: *node_cache
+  rules:
+    # Só executa quando as credenciais estiverem cadastradas no projeto.
+    - if: $BROWSERSTACK_USERNAME && $BROWSERSTACK_ACCESS_KEY
+      when: always
+    - when: never
+  script:
+    - |
+      if [ -z "$BROWSERSTACK_APP_ID" ]; then
+        echo "BROWSERSTACK_APP_ID não definido — baixando e enviando o app"
+        npm run app:download -- --platform=android
+        BROWSERSTACK_APP_ID=$(npm run --silent app:upload -- --platform=android | grep -oE 'bs://[A-Za-z0-9]+' | head -1)
+        export BROWSERSTACK_APP_ID
+      fi
+      test -n "$BROWSERSTACK_APP_ID" || { echo "Falha ao obter o app_url do BrowserStack"; exit 1; }
+    - npm run test:browserstack
+  artifacts:
+    # Evidências precisam ser preservadas mesmo (principalmente) quando falha.
+    when: always
+    expire_in: 1 week
+    paths:
+      - allure-results/
+      - screenshots/
+      - logs/
+
+# ---------------------------------------------------------------------------
+# 4. Relatório Allure
+# ---------------------------------------------------------------------------
+report:allure:
+  stage: report
+  needs:
+    - job: install:dependencies
+    - job: test:browserstack
+      artifacts: true
+      optional: true
+  cache: *node_cache
+  when: always
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends default-jre-headless
+  script:
+    - mkdir -p allure-results
+    - npm run report:generate
+  artifacts:
+    when: always
+    expire_in: 1 month
+    paths:
+      - allure-report/
+      - allure-results/
+      - screenshots/
+      - logs/
+
+# ---------------------------------------------------------------------------
+# 5. Publicação do relatório no GitLab Pages (apenas na branch padrão)
+# ---------------------------------------------------------------------------
+pages:
+  stage: report
+  needs:
+    - job: report:allure
+      artifacts: true
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - rm -rf public && mv allure-report public
+  artifacts:
+    paths:
+      - public

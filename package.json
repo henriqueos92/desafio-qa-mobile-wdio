@@ -19,7 +19,9 @@
     "report:generate": "allure generate allure-results --clean --output allure-report",
     "report:open": "allure open allure-report",
     "test:browserstack": "wdio run config/wdio.browserstack.conf.js",
-    "app:upload": "node scripts/upload-browserstack.mjs"
+    "app:upload": "node scripts/upload-browserstack.mjs",
+    "validate:ci": "node scripts/validate-ci.mjs",
+    "validate": "npm run validate:selectors && npm run validate:configs && npm run validate:specs && npm run validate:ci"
   },
   "keywords": [
     "webdriverio",
@@ -46,6 +48,7 @@
     "appium": "^3.7.0",
     "chai": "^6.2.2",
     "dotenv": "^17.4.2",
+    "js-yaml": "^4.3.2",
     "mocha": "^12.0.0",
     "webdriverio": "^9.31.5"
   }
