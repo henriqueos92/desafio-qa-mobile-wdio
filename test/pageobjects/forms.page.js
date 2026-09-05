@@ -149,6 +149,24 @@ class FormsPage extends BasePage {
 
         return this;
     }
+
+    /**
+     * Toca no botão desabilitado.
+     *
+     * Não usa `tap()` de propósito: o `waitForEnabled` falharia, e o objetivo
+     * do cenário é justamente comprovar que o toque não produz efeito.
+     */
+    async tapInactiveButton() {
+        await this.inactiveButton.waitForDisplayed({ timeout: DEFAULT_TIMEOUT });
+        await this.inactiveButton.click();
+
+        return this;
+    }
+
+    /** @returns {Promise<boolean>} se o botão desabilitado continua visível. */
+    async isInactiveButtonDisplayed() {
+        return this.inactiveButton.isDisplayed();
+    }
 }
 
 export default new FormsPage();

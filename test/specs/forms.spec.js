@@ -68,9 +68,12 @@ describe('Formulários', () => {
     });
 
     it('CT-10 - não deve executar ação ao tocar no botão desabilitado', async () => {
-        await formsPage.inactiveButton.waitForDisplayed();
-        await formsPage.inactiveButton.click();
+        await formsPage.tapInactiveButton();
 
+        expect(
+            await formsPage.isInactiveButtonDisplayed(),
+            'o botão inativo deveria continuar na tela',
+        ).to.be.true;
         expect(
             await nativeAlert.isEventuallyShown(NEGATIVE_TIMEOUT),
             'o botão inativo não deveria disparar alerta',
