@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Environment / secrets
+.env
+.env.local
+*.pem
+*.p12
+
+# Test evidence & reports
+allure-results/
+allure-report/
+.allure/
+screenshots/
+logs/
+*.log
+
+# Application binaries (downloaded via npm run app:download)
+apps/android/*
+apps/ios/*
+!apps/android/.gitkeep
+!apps/ios/.gitkeep
+!apps/**/README.md
+
+# Appium / tooling
+.appium/
+appium.log
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Node / npm
+npm-debug.log*
+.npm/
+coverage/
