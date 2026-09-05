@@ -8,7 +8,8 @@
     "node": ">=20.19.0"
   },
   "scripts": {
-    "test": "echo \"Use: npm run test:android | npm run test:ios | npm run test:browserstack\" && exit 1"
+    "test": "echo \"Use: npm run test:android | npm run test:ios | npm run test:browserstack\" && exit 1",
+    "app:download": "node scripts/download-app.mjs"
   },
   "keywords": [
     "webdriverio",
