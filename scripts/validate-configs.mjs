@@ -6,7 +6,14 @@
  * W3C com prefixo `appium:` e que nenhuma credencial está embutida no código.
  */
 import assert from 'node:assert/strict';
+import { readFileSync, readdirSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
+const CONFIG_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'config');
+
+// Permite montar a configuração do BrowserStack sem credenciais reais.
+process.env.WDIO_VALIDATE_ONLY = '1';
 process.env.ANDROID_APP_PATH ||= '/tmp/native-demo-app.apk';
 process.env.IOS_APP_PATH ||= '/tmp/native-demo-app.app';
 
@@ -15,9 +22,7 @@ const TARGETS = [
     { name: 'ios', file: '../config/wdio.ios.conf.js', platform: 'iOS', automation: 'XCUITest' },
 ];
 
-if (process.argv.includes('--with-browserstack')) {
-    TARGETS.push({ name: 'browserstack', file: '../config/wdio.browserstack.conf.js', automation: null });
-}
+TARGETS.push({ name: 'browserstack', file: '../config/wdio.browserstack.conf.js', automation: null });
 
 const W3C_STANDARD_KEYS = new Set(['platformName', 'browserName', 'browserVersion', 'acceptInsecureCerts', 'pageLoadStrategy', 'proxy', 'setWindowRect', 'timeouts', 'strictFileInteractability', 'unhandledPromptBehavior']);
 const SECRET_PATTERN = /(access[_-]?key|password|token|secret)\s*[:=]\s*['"][^'"$]{6,}['"]/i;
@@ -62,6 +67,20 @@ for (const target of TARGETS) {
         fail(`[${target.name}] possível credencial embutida na configuração`);
     } else {
         console.log('  ✓ nenhuma credencial embutida (valores vêm de variáveis de ambiente)');
+    }
+}
+
+// Nenhum arquivo de configuração pode conter credenciais em texto claro.
+console.log('\n[segredos no código-fonte]');
+const HARDCODED_SECRET = /(user|key|accessKey|password|token)\s*:\s*['"][A-Za-z0-9_\-]{8,}['"]/;
+
+for (const file of readdirSync(CONFIG_DIR).filter((name) => name.endsWith('.js'))) {
+    const source = readFileSync(path.join(CONFIG_DIR, file), 'utf-8');
+
+    if (HARDCODED_SECRET.test(source)) {
+        fail(`config/${file} parece conter uma credencial em texto claro`);
+    } else {
+        console.log(`  ✓ config/${file}`);
     }
 }
 
