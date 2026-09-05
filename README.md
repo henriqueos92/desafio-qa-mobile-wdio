@@ -456,7 +456,7 @@ branch e em merge requests** (sem pipelines duplicados):
 
 | Stage | Job | O que faz |
 |---|---|---|
-| `install` | `install:dependencies` | `npm ci` com cache por `package-lock.json` |
+| `install` | `install:dependencies` | aquece o cache do npm (`npm ci`) |
 | `validate` | `validate:project` | valida seletores (Android e iOS), configurações e specs — sem device |
 | `test` | `test:browserstack` | executa a suíte em dispositivos reais |
 | `report` | `report:allure` | gera o Allure e publica os artefatos |
@@ -470,6 +470,12 @@ o app automaticamente caso `BROWSERSTACK_APP_ID` não esteja definido.
 Todos os artefatos usam `when: always`, então **evidências ficam disponíveis
 mesmo quando os testes falham**: `allure-results/`, `allure-report/`,
 `screenshots/` e `logs/`.
+
+`node_modules` (~260 MB) **não** trafega como artefato entre jobs — o cache
+guarda apenas o diretório de download do npm (`.npm/`), e cada job reconstrói
+as dependências com `npm ci --prefer-offline`, resolvendo tudo offline. Isso
+evita consumir cota de armazenamento a cada pipeline. `npm run validate:ci`
+falha se alguém reintroduzir `node_modules` como artefato.
 
 ### Cadastrando as variáveis no GitLab
 

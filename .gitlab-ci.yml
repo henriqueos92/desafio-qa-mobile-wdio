@@ -41,41 +41,53 @@ workflow:
       when: never
     - if: $CI_COMMIT_BRANCH
 
-.node_cache: &node_cache
+.npm_cache: &npm_cache
   key:
     files:
       - package-lock.json
+    prefix: npm
   paths:
     - .npm/
   policy: pull
 
+# Jobs que precisam das dependencias herdam este template. O cache guarda
+# apenas o diretorio de download do npm (.npm/), nunca node_modules: com o
+# cache quente o `npm ci` resolve tudo offline, sem trafegar ~260 MB entre
+# jobs nem consumir cota de artefatos.
+.with_dependencies:
+  cache: *npm_cache
+  before_script:
+    - npm ci --prefer-offline --no-audit --no-fund
+
 # ---------------------------------------------------------------------------
 # 1. Instalação de dependências
 # ---------------------------------------------------------------------------
+# Aquece o cache do npm para os demais stages. Nao publica artefatos:
+# node_modules e reconstruido em cada job a partir do cache.
 install:dependencies:
   stage: install
   cache:
     key:
       files:
         - package-lock.json
+      prefix: npm
     paths:
       - .npm/
     policy: pull-push
   script:
     - node --version && npm --version
     - npm ci --no-audit --no-fund
-  artifacts:
-    expire_in: 1 day
-    paths:
-      - node_modules/
+    - npm ls --depth=0 || true
 
 # ---------------------------------------------------------------------------
 # 2. Validações estáticas (não dependem de device nem de credenciais)
 # ---------------------------------------------------------------------------
 validate:project:
   stage: validate
-  needs: ["install:dependencies"]
-  cache: *node_cache
+  extends: .with_dependencies
+  needs:
+    - job: install:dependencies
+      artifacts: false
   script:
     - npm run validate:selectors
     - npm run validate:selectors -- --platform=ios
@@ -92,8 +104,10 @@ validate:project:
 # ---------------------------------------------------------------------------
 test:browserstack:
   stage: test
-  needs: ["install:dependencies"]
-  cache: *node_cache
+  extends: .with_dependencies
+  needs:
+    - job: install:dependencies
+      artifacts: false
   rules:
     # Só executa quando as credenciais estiverem cadastradas no projeto.
     - if: $BROWSERSTACK_USERNAME && $BROWSERSTACK_ACCESS_KEY
@@ -125,13 +139,16 @@ report:allure:
   stage: report
   needs:
     - job: install:dependencies
+      artifacts: false
     - job: test:browserstack
       artifacts: true
       optional: true
-  cache: *node_cache
+  cache: *npm_cache
   when: always
   before_script:
+    # O allure-commandline e uma aplicacao Java.
     - apt-get update -qq && apt-get install -y -qq --no-install-recommends default-jre-headless
+    - npm ci --prefer-offline --no-audit --no-fund
   script:
     - mkdir -p allure-results
     - npm run report:generate

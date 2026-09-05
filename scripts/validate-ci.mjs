@@ -42,6 +42,18 @@ for (const expected of ['allure-report/', 'allure-results/', 'screenshots/', 'lo
 }
 console.log(`  ✓ artefatos preservados sempre: ${evidencePaths.join(', ')}`);
 
+// node_modules (~260 MB) jamais deve trafegar como artefato entre jobs:
+// isso consome cota de armazenamento a cada pipeline. Use o cache do npm.
+for (const job of jobs) {
+    const paths = pipeline[job].artifacts?.paths ?? [];
+
+    assert.ok(
+        !paths.some((entry) => entry.includes('node_modules')),
+        `job "${job}" não pode publicar node_modules como artefato — use o cache do npm`,
+    );
+}
+console.log('  ✓ nenhum job publica node_modules como artefato');
+
 const SECRET_VALUE = /(BROWSERSTACK_(?:USERNAME|ACCESS_KEY|APP_ID))\s*[:=]\s*["']?[A-Za-z0-9][^\s"'$]{5,}/;
 assert.ok(!SECRET_VALUE.test(raw), 'o .gitlab-ci.yml não pode conter valores de credenciais');
 console.log('  ✓ nenhum segredo escrito no YAML (apenas referências a variáveis)');
