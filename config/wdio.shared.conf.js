@@ -7,6 +7,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import 'dotenv/config';
+import { captureFailureScreenshot } from '../test/utils/screenshot.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -36,6 +37,33 @@ export const sharedConfig = {
 
     /** Diretórios usados para evidências. */
     screenshotPath: path.join(ROOT, 'screenshots'),
+
+    /**
+     * Captura automática de evidência APENAS quando o teste falha.
+     *
+     * @param {object} test objeto de teste do Mocha
+     * @param {object} _context
+     * @param {{ passed: boolean, error?: Error }} result
+     */
+    afterTest: async function afterTest(test, _context, { passed, error }) {
+        if (passed) {
+            return;
+        }
+
+        try {
+            const evidence = await captureFailureScreenshot(test);
+
+            if (evidence) {
+                console.log(`[evidência] screenshot da falha: ${evidence.filePath}`);
+            }
+        } catch (screenshotError) {
+            // Uma falha ao capturar a evidência não pode mascarar a falha real do teste.
+            console.warn(`[evidência] não foi possível capturar a screenshot: ${screenshotError.message}`);
+            if (error) {
+                console.warn(`[evidência] falha original preservada: ${error.message}`);
+            }
+        }
+    },
 };
 
 export const ROOT_DIR = ROOT;
