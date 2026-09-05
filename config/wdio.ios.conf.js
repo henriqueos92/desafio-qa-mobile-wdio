@@ -9,8 +9,25 @@
 import { sharedConfig } from './wdio.shared.conf.js';
 import { mergeConfig } from './merge.js';
 import { resolveAppPath } from './app-path.js';
+import { buildEnvironmentInfo } from './environment-info.js';
 
 export const config = mergeConfig(sharedConfig, {
+    reporters: [
+        'spec',
+        [
+            'allure',
+            {
+                ...sharedConfig.reporters[1][1],
+                reportedEnvironmentVars: buildEnvironmentInfo({
+                    Platform: 'iOS',
+                    PlatformVersion: process.env.IOS_PLATFORM_VERSION,
+                    Device: process.env.IOS_DEVICE_NAME || 'iPhone 16',
+                    AutomationName: 'XCUITest',
+                }),
+            },
+        ],
+    ],
+
     port: Number(process.env.APPIUM_PORT || 4723),
     path: '/',
 

@@ -14,7 +14,10 @@
     "validate:specs": "mocha --dry-run --reporter spec --require ./scripts/mocha-globals-stub.js \"test/specs/**/*.spec.js\"",
     "test:android": "wdio run config/wdio.android.conf.js",
     "test:ios": "wdio run config/wdio.ios.conf.js",
-    "validate:configs": "node scripts/validate-configs.mjs"
+    "validate:configs": "node scripts/validate-configs.mjs",
+    "report:clean": "node -e \"const fs=require('node:fs');for(const d of ['allure-results','allure-report'])fs.rmSync(d,{recursive:true,force:true})\"",
+    "report:generate": "allure generate allure-results --clean --output allure-report",
+    "report:open": "allure open allure-report"
   },
   "keywords": [
     "webdriverio",

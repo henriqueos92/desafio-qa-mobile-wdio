@@ -9,8 +9,25 @@
 import { sharedConfig } from './wdio.shared.conf.js';
 import { mergeConfig } from './merge.js';
 import { resolveAppPath } from './app-path.js';
+import { buildEnvironmentInfo } from './environment-info.js';
 
 export const config = mergeConfig(sharedConfig, {
+    reporters: [
+        'spec',
+        [
+            'allure',
+            {
+                ...sharedConfig.reporters[1][1],
+                reportedEnvironmentVars: buildEnvironmentInfo({
+                    Platform: 'Android',
+                    PlatformVersion: process.env.ANDROID_PLATFORM_VERSION,
+                    Device: process.env.ANDROID_DEVICE_NAME || process.env.ANDROID_AVD || 'Android Emulator',
+                    AutomationName: 'UiAutomator2',
+                }),
+            },
+        ],
+    ],
+
     port: Number(process.env.APPIUM_PORT || 4723),
     path: '/',
 

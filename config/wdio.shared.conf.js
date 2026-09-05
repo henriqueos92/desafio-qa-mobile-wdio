@@ -7,6 +7,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import 'dotenv/config';
+import allureReporter from '@wdio/allure-reporter';
 import { captureFailureScreenshot } from '../test/utils/screenshot.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -33,7 +34,21 @@ export const sharedConfig = {
         timeout: Number(process.env.MOCHA_TIMEOUT || 120000),
     },
 
-    reporters: ['spec'],
+    reporters: [
+        'spec',
+        [
+            'allure',
+            {
+                outputDir: path.join(ROOT, 'allure-results'),
+                disableWebdriverStepsReporting: false,
+                disableWebdriverScreenshotsReporting: false,
+                disableMochaHooks: false,
+                addConsoleLogs: true,
+                // Sobrescrito por cada configuração de plataforma/ambiente.
+                reportedEnvironmentVars: {},
+            },
+        ],
+    ],
 
     /** Diretórios usados para evidências. */
     screenshotPath: path.join(ROOT, 'screenshots'),
@@ -55,6 +70,12 @@ export const sharedConfig = {
 
             if (evidence) {
                 console.log(`[evidência] screenshot da falha: ${evidence.filePath}`);
+                // Anexa a mesma evidência ao Allure, junto do teste que falhou.
+                allureReporter.addAttachment(
+                    `Screenshot da falha — ${test.title}`,
+                    Buffer.from(evidence.base64, 'base64'),
+                    'image/png',
+                );
             }
         } catch (screenshotError) {
             // Uma falha ao capturar a evidência não pode mascarar a falha real do teste.
