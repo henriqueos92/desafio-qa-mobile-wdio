@@ -1,0 +1,44 @@
+[
+  {
+    "id": "CT-04.1",
+    "description": "login válido com e-mail e senha corretos",
+    "email": "qa.automation@webdriver.io",
+    "password": "SuperSecret123",
+    "expected": "success"
+  },
+  {
+    "id": "CT-04.2",
+    "description": "login com e-mail sem arroba",
+    "email": "email-invalido",
+    "password": "SuperSecret123",
+    "expected": "invalid-email"
+  },
+  {
+    "id": "CT-04.3",
+    "description": "login com e-mail sem domínio",
+    "email": "usuario@",
+    "password": "SuperSecret123",
+    "expected": "invalid-email"
+  },
+  {
+    "id": "CT-04.4",
+    "description": "login com senha de 3 caracteres",
+    "email": "qa.automation@webdriver.io",
+    "password": "123",
+    "expected": "short-password"
+  },
+  {
+    "id": "CT-04.5",
+    "description": "login com senha de exatamente 8 caracteres (limite aceito)",
+    "email": "limite@webdriver.io",
+    "password": "12345678",
+    "expected": "success"
+  },
+  {
+    "id": "CT-04.6",
+    "description": "login com senha de 7 caracteres (um abaixo do limite)",
+    "email": "limite@webdriver.io",
+    "password": "1234567",
+    "expected": "short-password"
+  }
+]

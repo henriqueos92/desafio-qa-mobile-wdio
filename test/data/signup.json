@@ -1,0 +1,27 @@
+{
+  "validSignUp": {
+    "id": "CT-05.1",
+    "description": "cadastro com dados válidos",
+    "email": "novo.usuario@webdriver.io",
+    "password": "SuperSecret123",
+    "repeatPassword": "SuperSecret123"
+  },
+  "invalidSignUps": [
+    {
+      "id": "CT-06.1",
+      "description": "cadastro com e-mail inválido",
+      "email": "sem-arroba",
+      "password": "SuperSecret123",
+      "repeatPassword": "SuperSecret123",
+      "expected": "invalid-email"
+    },
+    {
+      "id": "CT-06.2",
+      "description": "cadastro com senha menor que 8 caracteres",
+      "email": "novo.usuario@webdriver.io",
+      "password": "123",
+      "repeatPassword": "123",
+      "expected": "short-password"
+    }
+  ]
+}

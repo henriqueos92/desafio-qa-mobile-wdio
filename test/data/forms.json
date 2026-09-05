@@ -1,0 +1,28 @@
+{
+  "inputTexts": [
+    {
+      "id": "CT-09.1",
+      "description": "texto simples",
+      "value": "WebdriverIO"
+    },
+    {
+      "id": "CT-09.2",
+      "description": "texto com números e espaços",
+      "value": "Appium 3 rodando"
+    },
+    {
+      "id": "CT-09.3",
+      "description": "texto com acentuação",
+      "value": "automação móvel"
+    }
+  ],
+  "dropdownOptions": [
+    "webdriver.io is awesome",
+    "Appium is awesome",
+    "This app is awesome"
+  ],
+  "switchTexts": {
+    "off": "Click to turn the switch ON",
+    "on": "Click to turn the switch OFF"
+  }
+}

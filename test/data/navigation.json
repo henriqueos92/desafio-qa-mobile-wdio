@@ -1,0 +1,13 @@
+{
+  "tabBarRoutes": [
+    { "id": "CT-07.1", "tab": "Login", "page": "login", "screen": "~Login-screen" },
+    { "id": "CT-07.2", "tab": "Forms", "page": "forms", "screen": "~Forms-screen" },
+    { "id": "CT-07.3", "tab": "Swipe", "page": "swipe", "screen": "~Swipe-screen" },
+    { "id": "CT-07.4", "tab": "Drag", "page": "drag", "screen": "~Drag-drop-screen" },
+    { "id": "CT-07.5", "tab": "Home", "page": "home", "screen": "~Home-screen" }
+  ],
+  "sideMenuRoutes": [
+    { "id": "CT-08.1", "route": "permissions", "page": "permissions", "screen": "~Permissions-screen" },
+    { "id": "CT-08.2", "route": "data-management", "page": "dataManagement", "screen": "~DataManagement-screen" }
+  ]
+}
