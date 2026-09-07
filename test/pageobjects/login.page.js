@@ -39,8 +39,13 @@ class LoginPage extends BasePage {
         return $('~button-LOGIN');
     }
 
+    /**
+     * O id vem de `button-${text}` em Button.tsx, e o texto e "SIGN UP" —
+     * com ESPACO, nao hifen. Confirmado em execucao real: o botao aparece na
+     * tela mas ~button-SIGN-UP nunca casa.
+     */
     get signUpButton() {
-        return $('~button-SIGN-UP');
+        return $('~button-SIGN UP');
     }
 
     /** Só existe quando o device tem biometria cadastrada. */

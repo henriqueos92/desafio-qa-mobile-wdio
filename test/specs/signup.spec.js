@@ -21,9 +21,10 @@ describe('Cadastro (Sign up)', () => {
     });
 
     afterEach(async () => {
-        if (await nativeAlert.isEventuallyShown(NEGATIVE_TIMEOUT)) {
-            await nativeAlert.accept();
-        }
+        // Um alerta esquecido na tela bloqueia o próximo teste e faz o Mocha
+        // abortar a suíte inteira. O catch garante que a limpeza jamais
+        // transforme uma falha isolada em cascata.
+        await nativeAlert.dismissIfPresent(NEGATIVE_TIMEOUT).catch(() => undefined);
     });
 
     it('CT-05 - deve cadastrar um novo usuário com dados válidos', async () => {

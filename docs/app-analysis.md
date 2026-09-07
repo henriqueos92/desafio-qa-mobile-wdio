@@ -81,7 +81,7 @@ A v2 substituiu a tab bar fixa por uma **tab bar customizada + menu lateral**
 | Campo senha | `~input-password` |
 | Campo confirmar senha (só na aba Sign up) | `~input-repeat-password` |
 | Botão LOGIN | `~button-LOGIN` |
-| Botão SIGN UP | `~button-SIGN-UP` |
+| Botão SIGN UP | `~button-SIGN UP` (**espaço**, não hífen — o texto do botão é `SIGN UP`) |
 | Botão biométrico (só se o device tiver biometria cadastrada) | `~button-biometric` |
 
 ### Regras de validação (extraídas do código)
@@ -110,7 +110,7 @@ A v2 substituiu a tab bar fixa por uma **tab bar customizada + menu lateral**
 | Resultado do texto | `~input-text-result` | espelha em tempo real o que foi digitado |
 | Switch | `~switch` | alterna ON/OFF |
 | Texto do switch | `~switch-text` | `Click to turn the switch ON` / `... OFF` (mostra a **próxima** ação) |
-| Dropdown (wrapper) | `~Dropdown` | `react-native-picker-select` |
+| Dropdown (wrapper) | `~Dropdown` | `react-native-picker-select`; declarado com `accessible: false`, então `getText()` nele retorna vazio no Android — leia pelo texto renderizado |
 | Dropdown (picker) | `~Dropdown picker` | picker nativo |
 | Botão ativo | `~button-Active` | abre alerta `This button is` / `This button is active` com opções "Ask me later", "Cancel", "OK" |
 | Botão inativo | `~button-Inactive` | desabilitado (não dispara ação) |
@@ -150,7 +150,7 @@ Opções do dropdown: `webdriver.io is awesome`, `Appium is awesome`, `This app 
 | Tema | Android (UiAutomator2) | iOS (XCUITest) |
 |---|---|---|
 | Origem do accessibility id | `accessibilityLabel` → `content-desc` | `testID` → `accessibilityIdentifier` |
-| Alertas nativos | `android.widget.TextView[@resource-id="android:id/alertTitle"]`, `.../message`, botões `android:id/button1..3` | elemento `XCUIElementTypeAlert`; título/mensagem são `XCUIElementTypeStaticText` filhos |
+| Alertas nativos | id do título vem do AppCompat (`<pacote>:id/alertTitle`) ou do framework (`android:id/alertTitle`) conforme o tema — use `resourceIdMatches(".*:id/alertTitle")` | elemento `XCUIElementTypeAlert`; título/mensagem são `XCUIElementTypeStaticText` filhos |
 | Dropdown | `useNativeAndroidPickerStyle={false}` → itens renderizados como *modal* React Native | `UIPickerWheel` nativo — selecionado via `setValue` na roda do picker |
 | Switch | `android.widget.Switch` (atributo `checked`) | `XCUIElementTypeSwitch` (`value` `"0"`/`"1"`) |
 | Teclado | pode cobrir campos; usar `hideKeyboard()` | idem, além do botão "Done" da toolbar |

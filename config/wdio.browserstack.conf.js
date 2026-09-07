@@ -96,6 +96,14 @@ const selected = {
     all: devices,
 }[(process.env.BROWSERSTACK_PLATFORM || 'android').toLowerCase()] ?? devices;
 
+/**
+ * Limita quantos devices da matriz serão usados. Útil para validar a suíte
+ * com BROWSERSTACK_MAX_DEVICES=1 antes de gastar minutos do plano rodando
+ * o mesmo problema em vários aparelhos. Sem a variável, usa a matriz toda.
+ */
+const maxDevices = Number(process.env.BROWSERSTACK_MAX_DEVICES || 0);
+const capabilities = maxDevices > 0 ? selected.slice(0, maxDevices) : selected;
+
 export const config = mergeConfig(sharedConfig, {
     user: BROWSERSTACK_USERNAME,
     key: BROWSERSTACK_ACCESS_KEY,
@@ -126,7 +134,7 @@ export const config = mergeConfig(sharedConfig, {
                     Provider: 'BrowserStack App Automate',
                     ProjectName: projectName,
                     BuildName: buildName,
-                    Devices: selected
+                    Devices: capabilities
                         .map((device) => `${device['bstack:options'].deviceName} (${device['bstack:options'].platformVersion})`)
                         .join(', '),
                 }),
@@ -134,7 +142,7 @@ export const config = mergeConfig(sharedConfig, {
         ],
     ],
 
-    capabilities: selected,
+    capabilities,
 });
 
 export default config;

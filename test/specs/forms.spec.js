@@ -15,9 +15,10 @@ describe('Formulários', () => {
     });
 
     afterEach(async () => {
-        if (await nativeAlert.isEventuallyShown(NEGATIVE_TIMEOUT)) {
-            await nativeAlert.accept();
-        }
+        // Um alerta esquecido na tela bloqueia o próximo teste e faz o Mocha
+        // abortar a suíte inteira. O catch garante que a limpeza jamais
+        // transforme uma falha isolada em cascata.
+        await nativeAlert.dismissIfPresent(NEGATIVE_TIMEOUT).catch(() => undefined);
     });
 
     describe('CT-09 - preenchimento do campo de texto (test/data/forms.json)', () => {
@@ -52,8 +53,10 @@ describe('Formulários', () => {
 
         await formsPage.selectDropdownOption(secondOption);
 
-        expect(await formsPage.getSelectedDropdownOption(), 'opção selecionada no dropdown')
-            .to.include(secondOption);
+        expect(
+            await formsPage.isDropdownOptionSelected(secondOption),
+            `a opção "${secondOption}" deveria estar selecionada no dropdown`,
+        ).to.be.true;
     });
 
     it('CT-10 - deve exibir o alerta ao tocar no botão habilitado', async () => {

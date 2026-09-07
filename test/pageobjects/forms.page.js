@@ -136,11 +136,18 @@ class FormsPage extends BasePage {
         return this;
     }
 
-    /** @returns {Promise<string>} rótulo atualmente exibido no dropdown. */
-    async getSelectedDropdownOption() {
-        await this.dropdown.waitForDisplayed({ timeout: DEFAULT_TIMEOUT });
-
-        return this.dropdown.getText();
+    /**
+     * Indica se a opção informada é a exibida no dropdown.
+     *
+     * O wrapper `~Dropdown` é declarado com `accessible: false` no app
+     * (`testProperties('Dropdown', true)`), então `getText()` nele retorna
+     * vazio no Android. A leitura correta é pelo texto renderizado.
+     *
+     * @param {string} option
+     * @returns {Promise<boolean>}
+     */
+    async isDropdownOptionSelected(option) {
+        return this.isEventuallyDisplayed(byExactText(option), DEFAULT_TIMEOUT);
     }
 
     /** Toca no botão habilitado, que dispara um alerta nativo. */

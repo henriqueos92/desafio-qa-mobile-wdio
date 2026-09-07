@@ -71,7 +71,8 @@ check('Login — campo e-mail', sel(loginPage.emailInput), '~input-email');
 check('Login — campo senha', sel(loginPage.passwordInput), '~input-password');
 check('Login — confirmar senha', sel(loginPage.repeatPasswordInput), '~input-repeat-password');
 check('Login — botão LOGIN', sel(loginPage.loginButton), '~button-LOGIN');
-check('Login — botão SIGN UP', sel(loginPage.signUpButton), '~button-SIGN-UP');
+// Espaco, nao hifen: Button.tsx monta `button-${text}` e o texto e "SIGN UP".
+check('Login — botão SIGN UP', sel(loginPage.signUpButton), '~button-SIGN UP');
 check('Login — botão biométrico', sel(loginPage.biometricButton), '~button-biometric');
 check('Login — mensagem e-mail inválido', VALIDATION_MESSAGES.invalidEmail, 'Please enter a valid email address');
 check('Login — mensagem senha curta', VALIDATION_MESSAGES.shortPassword, 'Please enter at least 8 characters');
@@ -120,7 +121,7 @@ check(
     'Alerta nativo — título',
     sel(nativeAlert.title),
     isAndroid
-        ? '//android.widget.TextView[@resource-id="android:id/alertTitle"]'
+        ? 'android=new UiSelector().resourceIdMatches(".*:id/alertTitle")'
         : '-ios class chain:**/XCUIElementTypeAlert/**/XCUIElementTypeStaticText[1]',
 );
 

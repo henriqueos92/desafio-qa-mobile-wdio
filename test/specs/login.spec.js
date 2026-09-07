@@ -45,10 +45,10 @@ describe('Login', () => {
     });
 
     afterEach(async () => {
-        // Impede que um alerta remanescente contamine o próximo teste.
-        if (await nativeAlert.isEventuallyShown(NEGATIVE_TIMEOUT)) {
-            await nativeAlert.accept();
-        }
+        // Um alerta esquecido na tela bloqueia o próximo teste e faz o Mocha
+        // abortar a suíte inteira. O catch garante que a limpeza jamais
+        // transforme uma falha isolada em cascata.
+        await nativeAlert.dismissIfPresent(NEGATIVE_TIMEOUT).catch(() => undefined);
     });
 
     it('CT-01 - deve autenticar o usuário com credenciais válidas', async () => {
