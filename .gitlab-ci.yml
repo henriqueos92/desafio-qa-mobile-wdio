@@ -93,11 +93,6 @@ validate:project:
     - npm run validate:selectors -- --platform=ios
     - npm run validate:configs
     - npm run validate:specs
-  artifacts:
-    when: always
-    expire_in: 1 week
-    paths:
-      - logs/
 
 # ---------------------------------------------------------------------------
 # 3. Testes em dispositivos reais (BrowserStack)
@@ -170,7 +165,11 @@ pages:
     - job: report:allure
       artifacts: true
   rules:
+    # when: always — o relatorio precisa ser publicado JUSTAMENTE quando algo
+    # falha. O `needs` abaixo continua impedindo a publicacao se o proprio
+    # report:allure nao gerar o relatorio.
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: always
   script:
     - rm -rf public && mv allure-report public
   artifacts:

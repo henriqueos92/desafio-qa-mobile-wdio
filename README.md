@@ -460,7 +460,7 @@ branch e em merge requests** (sem pipelines duplicados):
 | `validate` | `validate:project` | valida seletores (Android e iOS), configurações e specs — sem device |
 | `test` | `test:browserstack` | executa a suíte em dispositivos reais |
 | `report` | `report:allure` | gera o Allure e publica os artefatos |
-| `report` | `pages` | publica o relatório no GitLab Pages (branch padrão) |
+| `report` | `pages` | publica o relatório no GitLab Pages (branch padrão), **inclusive quando os testes falham** |
 
 Rodar um **emulador Android dentro de um runner compartilhado do GitLab exige
 KVM/virtualização**, normalmente indisponível; por isso o pipeline usa o
@@ -470,6 +470,11 @@ o app automaticamente caso `BROWSERSTACK_APP_ID` não esteja definido.
 Todos os artefatos usam `when: always`, então **evidências ficam disponíveis
 mesmo quando os testes falham**: `allure-results/`, `allure-report/`,
 `screenshots/` e `logs/`.
+
+O job `pages` usa `when: always` de propósito: o relatório precisa estar
+publicado justamente quando algo falha. O `needs: report:allure` continua
+impedindo a publicação caso o próprio relatório não seja gerado — não há o que
+publicar nesse caso.
 
 `node_modules` (~260 MB) **não** trafega como artefato entre jobs — o cache
 guarda apenas o diretório de download do npm (`.npm/`), e cada job reconstrói
