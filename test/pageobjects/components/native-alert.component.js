@@ -15,9 +15,16 @@ import { byPlatform, isAndroid, DEFAULT_TIMEOUT, SUBMIT_TIMEOUT } from '../../ut
  */
 const SELECTORS = {
     android: {
-        // resourceIdMatches cobre tanto "android:id/..." (framework) quanto
-        // "com.wdiodemoapp:id/..." (AppCompat), que variam conforme o tema.
-        title: 'android=new UiSelector().resourceIdMatches(".*:id/alertTitle")',
+        // Ids CONFIRMADOS na árvore de elementos de um device real
+        // (logs/page-source/, Galaxy S23 / Android 13):
+        //   título   -> com.wdiodemoapp:id/alert_title   (layout do Material Components)
+        //   mensagem -> android:id/message               (id do framework)
+        //   OK       -> android:id/button1               (id do framework)
+        //
+        // O título usa "alert_title" com underscore, e não o "alertTitle" do
+        // AppCompat. O regex aceita as duas grafias para tolerar mudanças de
+        // tema entre versões do app.
+        title: 'android=new UiSelector().resourceIdMatches(".*:id/alert_?[tT]itle")',
         message: 'android=new UiSelector().resourceIdMatches(".*:id/message")',
         // button1 = botão positivo (o último do array passado ao Alert.alert do React Native)
         primaryButton: 'android=new UiSelector().resourceIdMatches(".*:id/button1")',

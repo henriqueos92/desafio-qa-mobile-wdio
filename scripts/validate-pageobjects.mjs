@@ -121,7 +121,7 @@ check(
     'Alerta nativo — título',
     sel(nativeAlert.title),
     isAndroid
-        ? 'android=new UiSelector().resourceIdMatches(".*:id/alertTitle")'
+        ? 'android=new UiSelector().resourceIdMatches(".*:id/alert_?[tT]itle")'
         : '-ios class chain:**/XCUIElementTypeAlert/**/XCUIElementTypeStaticText[1]',
 );
 

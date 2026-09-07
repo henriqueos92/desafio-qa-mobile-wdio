@@ -150,7 +150,7 @@ Opções do dropdown: `webdriver.io is awesome`, `Appium is awesome`, `This app 
 | Tema | Android (UiAutomator2) | iOS (XCUITest) |
 |---|---|---|
 | Origem do accessibility id | `accessibilityLabel` → `content-desc` | `testID` → `accessibilityIdentifier` |
-| Alertas nativos | id do título vem do AppCompat (`<pacote>:id/alertTitle`) ou do framework (`android:id/alertTitle`) conforme o tema — use `resourceIdMatches(".*:id/alertTitle")` | elemento `XCUIElementTypeAlert`; título/mensagem são `XCUIElementTypeStaticText` filhos |
+| Alertas nativos | **confirmado em device real**: título `<pacote>:id/alert_title` (Material Components, com underscore), mensagem `android:id/message`, botão OK `android:id/button1`. Botões vêm em CAIXA ALTA, então a busca por rótulo precisa ser case-insensitive | elemento `XCUIElementTypeAlert`; título/mensagem são `XCUIElementTypeStaticText` filhos |
 | Dropdown | `useNativeAndroidPickerStyle={false}` → itens renderizados como *modal* React Native | `UIPickerWheel` nativo — selecionado via `setValue` na roda do picker |
 | Switch | `android.widget.Switch` (atributo `checked`) | `XCUIElementTypeSwitch` (`value` `"0"`/`"1"`) |
 | Teclado | pode cobrir campos; usar `hideKeyboard()` | idem, além do botão "Done" da toolbar |
