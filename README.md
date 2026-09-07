@@ -21,6 +21,8 @@ BrowserStack e pipeline no GitLab CI/CD.
 - [iOS](#ios)
 - [BrowserStack](#browserstack)
 - [Allure Report](#allure-report)
+- [Evidência de execução](#evidência-de-execução)
+- [Cobertura dos requisitos](#cobertura-dos-requisitos)
 - [Cenários automatizados](#cenários-automatizados)
 - [Data-driven testing](#data-driven-testing)
 - [Screenshots](#screenshots)
@@ -101,7 +103,7 @@ Prioridade adotada, conforme o próprio app expõe os identificadores:
 ## Estrutura de arquivos
 
 ```
-mobile-automation/
+desafio-qa-mobile-wdio/
 │
 ├── apps/                          # binários da aplicação (não versionados)
 │   ├── android/                   #   android.wdio.native.app.v2.2.0.apk
@@ -159,12 +161,13 @@ mobile-automation/
 │       ├── environment.js         # plataforma e metadados da sessão
 │       ├── selectors.js           # seletores por texto multiplataforma
 │       ├── gestures.js            # swipe e drag com W3C Actions
-│       ├── screenshot.js          # evidência de falha
+│       ├── screenshot.js          # screenshot da falha
+│       ├── page-source.js         # árvore de elementos na falha
 │       ├── logger.js              # log com redação de segredos
 │       └── data-loader.js         # carga das massas JSON
 │
-├── screenshots/                   # evidências de falha (não versionadas)
-├── logs/                          # logs de execução (não versionados)
+├── screenshots/                   # screenshots de falha (não versionadas)
+├── logs/                          # logs de execução + page-source/ (não versionados)
 │
 ├── .env.example
 ├── .gitlab-ci.yml
@@ -361,6 +364,78 @@ Environment=Local
 Na execução em nuvem os mesmos campos registram `Environment=BrowserStack`,
 `Provider`, `ProjectName`, `BuildName` e a lista de `Devices`.
 
+## Evidência de execução
+
+A suíte **foi executada em dispositivos reais** no BrowserStack, pelo pipeline
+do GitLab. Não é uma afirmação de que "deveria funcionar" — é o resultado de
+uma execução verificável.
+
+```
+total: 27      passed: 27      failed: 0      broken: 0      skipped: 0
+```
+
+| | |
+|---|---|
+| Plataforma | Android |
+| Dispositivos | Samsung Galaxy S23 (13.0) e Google Pixel 8 (14.0) |
+| Execuções | 27 testes × 2 devices |
+| Duração da suíte | ~7 min por device |
+| Relatório | GitLab Pages (**Deploy → Pages** no projeto) |
+| Artefatos | `allure-results/`, `allure-report/`, `screenshots/`, `logs/` |
+
+| Suíte | Testes |
+|---|---|
+| Login | 9 |
+| Formulários | 7 |
+| Navegação | 7 |
+| Cadastro (Sign up) | 4 |
+
+### Grau de validação por ambiente
+
+Um projeto de automação vale pelo que foi comprovado, não pelo que foi
+configurado. A distinção abaixo é deliberada:
+
+| Ambiente | Estado | O que isso significa |
+|---|---|---|
+| **BrowserStack (Android real)** | ✅ **Executado** | 27/27 aprovados em 2 aparelhos. Evidência no pipeline. |
+| **Emulador Android** | ⚙️ Configurado | Mesmo driver (UiAutomator2), mesmos seletores e mesma suíte já aprovada em Android real — muda apenas a capability do dispositivo. |
+| **Simulador iOS** | ⚙️ Configurado | Seletores validados estaticamente (49/49). **Não executado.** Alertas, picker e teclado são renderizados pelo sistema, e foi justamente essa categoria que exigiu correção no Android — é razoável esperar ajustes equivalentes aqui. |
+
+Os dois ambientes locais dependem apenas de ferramenta instalada (Android SDK
+e Xcode), não de mudança de código.
+
+### O que a execução real corrigiu
+
+Quatro defeitos que **nenhuma validação estática pegaria**, encontrados ao
+rodar em dispositivo e corrigidos com base em evidência:
+
+| Defeito | Como foi diagnosticado |
+|---|---|
+| `~button-SIGN-UP` com hífen (o id é `~button-SIGN UP`, com espaço) | Screenshot mostrava o botão visível na tela |
+| Título do alerta é `<pacote>:id/alert_title` (Material Components), não `alertTitle` | Árvore de elementos capturada na falha |
+| `getText()` no wrapper `~Dropdown`, declarado `accessible: false`, retorna vazio | Screenshot mostrava a opção selecionada corretamente |
+| Cenário de "formulário vazio" herdava dados do teste anterior | Page source mostrava o alerta de cadastro concluído |
+
+Foi essa sequência que motivou a **captura de page source em toda falha**
+(`logs/page-source/*.xml`): uma screenshot mostra o que o usuário vê, mas não
+mostra os identificadores — e é o identificador que faz o seletor falhar.
+
+## Cobertura dos requisitos
+
+| Requisito do desafio | Onde está | Evidência |
+|---|---|---|
+| JavaScript, WebdriverIO, Appium, Mocha, Chai | `package.json` | 27 testes executados |
+| Page Object Model | `test/pageobjects/` | Nenhum seletor nas specs (`npm run validate:selectors`) |
+| Data-driven testing | `test/data/*.json` | 10 cenários geram 27 testes |
+| 10 cenários | `docs/test-scenarios.md` | CT-01 a CT-10, todos aprovados |
+| **Emulador Android** | `config/wdio.android.conf.js` | ⚙️ configurado |
+| **Simulador iOS** | `config/wdio.ios.conf.js` | ⚙️ configurado |
+| BrowserStack *(opcional)* | `config/wdio.browserstack.conf.js` | ✅ executado, 27/27 em 2 devices reais |
+| Screenshots automáticos em falha | `test/utils/screenshot.js` | Capturadas e anexadas ao Allure nas execuções com falha |
+| Allure Report | `report:generate` / job `pages` | Publicado no GitLab Pages |
+| Logs | `test/utils/logger.js` | `logs/execution-*.log`, com redação de segredos |
+| GitLab CI/CD | `.gitlab-ci.yml` | Pipeline verde nos 5 jobs |
+
 ## Cenários automatizados
 
 Detalhamento completo (objetivo, pré-condições, dados, passos e resultado
@@ -431,6 +506,13 @@ android_login_ct-02-deve-exibir-erro-de-formato_2026-09-05T14-31-07-482Z.png
 
 A mesma imagem é anexada ao teste correspondente no Allure. Uma falha na
 captura da evidência é registrada como aviso e **nunca mascara a falha real**.
+
+Junto da screenshot, cada falha grava também a **árvore de elementos** em
+`logs/page-source/*.xml`. A screenshot mostra o que o usuário vê; o page
+source mostra o que o Appium enxerga — incluindo os `resource-id`, que são
+justamente o que faz um seletor falhar. Foi essa captura que revelou que o
+título do alerta no Android é `com.wdiodemoapp:id/alert_title`, encerrando
+duas rodadas de tentativa e erro.
 
 ## Logs
 
@@ -527,9 +609,13 @@ npm run validate:ci           # estrutura do .gitlab-ci.yml
 
 ## Limitações conhecidas
 
-* A execução end-to-end depende de emulador/simulador ou de credenciais do
-  BrowserStack. Onde não há esse acesso, as validações acima cobrem seletores,
-  configurações, estrutura de testes e pipeline.
+* **A suíte foi executada e aprovada em Android real** (BrowserStack, 27/27).
+  A execução em emulador Android e em simulador iOS depende de Android SDK e
+  Xcode instalados — não de mudanças no projeto. Enquanto isso, as validações
+  sem device cobrem seletores, configurações, estrutura de testes e pipeline.
+* **iOS nunca foi executado.** Os seletores passam na validação estática, mas
+  alertas e picker são renderizados pelo sistema operacional e provavelmente
+  exigirão ajustes equivalentes aos que o Android exigiu.
 * O carrossel da tela Swipe usa `testID` puro (sem o helper do app), logo não é
   acessível por *accessibility id* no Android — o gesto é feito por
   coordenadas relativas. Ver `docs/app-analysis.md`.
