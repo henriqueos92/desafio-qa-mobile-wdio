@@ -3,6 +3,7 @@ import loginPage, { VALIDATION_MESSAGES } from '../pageobjects/login.page.js';
 import nativeAlert from '../pageobjects/components/native-alert.component.js';
 import tabBar from '../pageobjects/components/tab-bar.component.js';
 import { loadData } from '../utils/data-loader.js';
+import { restartApp } from '../utils/environment.js';
 
 const { validSignUp, invalidSignUps } = loadData('signup');
 
@@ -38,21 +39,32 @@ describe('Cadastro (Sign up)', () => {
         expect(await loginPage.isDisplayed(), 'tela de login deve continuar visível').to.be.true;
     });
 
-    it('CT-06 - deve exigir os campos obrigatórios ao submeter o formulário vazio', async () => {
-        await loginPage.submitEmptySignUp();
+    describe('CT-06 - campos obrigatórios', () => {
+        beforeEach(async () => {
+            // Sem reiniciar, o formulário chega aqui com os dados válidos que
+            // o CT-05 digitou — e o cadastro seria concluído com sucesso,
+            // invalidando o cenário.
+            await restartApp();
+            await tabBar.openLogin();
+            await loginPage.openSignUpForm();
+        });
 
-        expect(
-            await loginPage.isEventuallyDisplayed(loginPage.invalidEmailMessage, NEGATIVE_TIMEOUT),
-            `mensagem "${VALIDATION_MESSAGES.invalidEmail}" deveria estar visível`,
-        ).to.be.true;
-        expect(
-            await loginPage.isEventuallyDisplayed(loginPage.shortPasswordMessage, NEGATIVE_TIMEOUT),
-            `mensagem "${VALIDATION_MESSAGES.shortPassword}" deveria estar visível`,
-        ).to.be.true;
-        expect(
-            await nativeAlert.isEventuallyShown(NEGATIVE_TIMEOUT),
-            'o cadastro não deveria ser concluído',
-        ).to.be.false;
+        it('deve exigir os campos obrigatórios ao submeter o formulário vazio', async () => {
+            await loginPage.submitEmptySignUp();
+
+            expect(
+                await loginPage.isEventuallyDisplayed(loginPage.invalidEmailMessage, NEGATIVE_TIMEOUT),
+                `mensagem "${VALIDATION_MESSAGES.invalidEmail}" deveria estar visível`,
+            ).to.be.true;
+            expect(
+                await loginPage.isEventuallyDisplayed(loginPage.shortPasswordMessage, NEGATIVE_TIMEOUT),
+                `mensagem "${VALIDATION_MESSAGES.shortPassword}" deveria estar visível`,
+            ).to.be.true;
+            expect(
+                await nativeAlert.isEventuallyShown(NEGATIVE_TIMEOUT),
+                'o cadastro não deveria ser concluído',
+            ).to.be.false;
+        });
     });
 
     describe('CT-06 - validações do cadastro orientadas a dados (test/data/signup.json)', () => {

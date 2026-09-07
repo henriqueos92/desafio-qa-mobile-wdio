@@ -50,6 +50,39 @@ export function getEnvironmentInfo() {
     };
 }
 
+/**
+ * Identificadores do app sob teste. Servem de fallback porque, no
+ * BrowserStack, as capabilities carregam apenas o `app` (bs://...) e não
+ * o appPackage/bundleId.
+ */
+const APP_IDS = { android: 'com.wdiodemoapp', ios: 'org.wdiodemoapp' };
+
+/** @returns {string} appPackage (Android) ou bundleId (iOS) do app sob teste. */
+export function getAppId() {
+    const capabilities = { ...driver.requestedCapabilities, ...driver.capabilities };
+
+    return capabilities['appium:appPackage']
+        ?? capabilities.appPackage
+        ?? capabilities['appium:bundleId']
+        ?? capabilities.bundleId
+        ?? (isAndroid() ? APP_IDS.android : APP_IDS.ios);
+}
+
+/**
+ * Reinicia o app, devolvendo-o ao estado inicial.
+ *
+ * O native-demo-app preserva o conteúdo dos campos do formulário ao alternar
+ * entre as abas Login e Sign up, então limpar campo a campo não garante um
+ * formulário realmente vazio: o estado do React pode continuar preenchido.
+ * Reiniciar é a única forma determinística.
+ */
+export async function restartApp() {
+    const appId = getAppId();
+
+    await driver.terminateApp(appId);
+    await driver.activateApp(appId);
+}
+
 /** Timeout padrão de espera explícita (ms), configurável por variável de ambiente. */
 export const DEFAULT_TIMEOUT = Number(process.env.WAIT_TIMEOUT || 15000);
 

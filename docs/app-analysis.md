@@ -84,6 +84,17 @@ A v2 substituiu a tab bar fixa por uma **tab bar customizada + menu lateral**
 | Botão SIGN UP | `~button-SIGN UP` (**espaço**, não hífen — o texto do botão é `SIGN UP`) |
 | Botão biométrico (só se o device tiver biometria cadastrada) | `~button-biometric` |
 
+### Comportamento de estado do formulário (confirmado em execução real)
+
+Os campos **não são limpos** ao alternar entre as abas Login e Sign up: o
+estado (`email`, `password`, `passwordConfirmation`) vive no componente
+`LoginForm` e sobrevive à troca de aba e à navegação entre telas.
+
+Consequência para a automação: um cenário de "campos obrigatórios vazios"
+precisa **reiniciar o app** (`restartApp()` em `test/utils/environment.js`).
+Apenas limpar os campos não é confiável, porque o estado do React pode
+continuar preenchido mesmo com o campo visualmente vazio.
+
 ### Regras de validação (extraídas do código)
 
 * E-mail: precisa casar com a regex de e-mail do componente.

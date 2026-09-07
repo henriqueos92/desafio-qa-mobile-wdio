@@ -132,7 +132,9 @@ ID:                CT-06
 Título:            Validação de campos obrigatórios no cadastro
 Objetivo:          Garantir que o formulário de cadastro não é submetido com
                    campos vazios e que todas as mensagens de erro aparecem.
-Pré-condições:     App aberto na tela de Login, aba interna "Sign up" ativa.
+Pré-condições:     App REINICIADO (o formulário preserva o que foi digitado
+                   ao trocar de aba, então sem reinício os campos chegariam
+                   preenchidos pelo CT-05), na aba interna "Sign up".
 Dados:             Nenhum (todos os campos em branco); e massa complementar de
                    test/data/signup.json para o caso de senhas divergentes.
 Passos:            1. Navegar para a aba "Login".
