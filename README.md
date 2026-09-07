@@ -1,5 +1,12 @@
 # Mobile Automation — WebdriverIO + Appium
 
+[![pipeline status](https://gitlab.com/henriqueos92/desafio-qa-mobile-wdio/badges/main/pipeline.svg)](https://gitlab.com/henriqueos92/desafio-qa-mobile-wdio/-/pipelines)
+[![tests](https://img.shields.io/badge/testes-27%2F27%20aprovados-brightgreen)](https://desafio-qa-mobile-wdio-0f6d5c.gitlab.io)
+[![devices](https://img.shields.io/badge/BrowserStack-2%20devices%20reais-orange)](https://desafio-qa-mobile-wdio-0f6d5c.gitlab.io)
+
+📊 **[Relatório Allure da última execução](https://desafio-qa-mobile-wdio-0f6d5c.gitlab.io)** — 27/27 testes
+aprovados em Samsung Galaxy S23 e Google Pixel 8, executados pelo pipeline do GitLab.
+
 Suíte de automação mobile **Android e iOS** para o aplicativo oficial
 [`webdriverio/native-demo-app`](https://github.com/webdriverio/native-demo-app)
 (versão **v2.2.0**), com Page Object Model, testes orientados a dados,
@@ -337,6 +344,11 @@ correspondente. Cada sessão é registrada com `projectName`, `buildName`
 
 ## Allure Report
 
+O relatório da última execução no CI está publicado em
+**https://desafio-qa-mobile-wdio-0f6d5c.gitlab.io** (GitLab Pages).
+
+Para gerar localmente:
+
 ```bash
 npm run report:generate   # allure-results/ -> allure-report/
 npm run report:open       # abre o relatório no navegador
@@ -380,7 +392,7 @@ total: 27      passed: 27      failed: 0      broken: 0      skipped: 0
 | Dispositivos | Samsung Galaxy S23 (13.0) e Google Pixel 8 (14.0) |
 | Execuções | 27 testes × 2 devices |
 | Duração da suíte | ~7 min por device |
-| Relatório | GitLab Pages (**Deploy → Pages** no projeto) |
+| Relatório | https://desafio-qa-mobile-wdio-0f6d5c.gitlab.io |
 | Artefatos | `allure-results/`, `allure-report/`, `screenshots/`, `logs/` |
 
 | Suíte | Testes |
