@@ -154,9 +154,20 @@ class NativeAlert {
             // Cai no fallback abaixo.
         }
 
-        const [title, ...rest] = (await driver.getAlertText()).split('\n');
+        // Fallback W3C: sabidamente NAO cobre o Alert.alert do React Native no
+        // Android, que e um AlertDialog dentro da app e nao um dialogo do SO.
+        // Vale para os alertas de sistema (permissoes) e para o iOS.
+        try {
+            const [title, ...rest] = (await driver.getAlertText()).split('\n');
 
-        return { title: title.trim(), message: rest.join('\n').trim() };
+            return { title: title.trim(), message: rest.join('\n').trim() };
+        } catch (error) {
+            throw new Error(
+                'Alerta não localizado: nem pelos seletores nativos nem pela API W3C. ' +
+                'Verifique o page source salvo em logs/page-source/ para conferir os ' +
+                `identificadores reais do diálogo. Causa original: ${error.message}`,
+            );
+        }
     }
 
     async #existsViaWebDriver() {

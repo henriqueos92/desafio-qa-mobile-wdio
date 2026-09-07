@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import 'dotenv/config';
 import allureReporter from '@wdio/allure-reporter';
 import { captureFailureScreenshot } from '../test/utils/screenshot.js';
+import { capturePageSource } from '../test/utils/page-source.js';
 import logger from '../test/utils/logger.js';
 import { getEnvironmentInfo } from '../test/utils/environment.js';
 
@@ -99,6 +100,16 @@ export const sharedConfig = {
         } catch (screenshotError) {
             // Uma falha ao capturar a evidência não pode mascarar a falha real do teste.
             logger.warn(`EVIDÊNCIA não foi possível capturar a screenshot: ${screenshotError.message}`);
+        }
+
+        try {
+            // A árvore de elementos é o que permite descobrir por que um
+            // seletor não casou — a screenshot sozinha não mostra os ids.
+            const sourcePath = await capturePageSource(test);
+
+            logger.info(`EVIDÊNCIA page source salvo em ${sourcePath}`);
+        } catch (sourceError) {
+            logger.warn(`EVIDÊNCIA não foi possível capturar o page source: ${sourceError.message}`);
         }
     },
 };
